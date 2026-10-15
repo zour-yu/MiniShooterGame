@@ -44,9 +44,17 @@ namespace MiniShooterGame.UI
 
         [SerializeField] private float lowHealthThreshold = 0.3f; // 30%
 
+        [Header("Weapon & Ammo Display")]
+        [Tooltip("Text displaying current weapon name (e.g. 'PISTOL').")]
+        [SerializeField] private TextMeshProUGUI weaponNameText;
+
+        [Tooltip("Text displaying remaining ammo (e.g. '24 / 24' or '∞').")]
+        [SerializeField] private TextMeshProUGUI ammoCountText;
+
         private PlayerHealth _playerHealth;
         private PlayerDash _playerDash;
         private WaveSpawner _waveSpawner;
+        private PlayerShooter _playerShooter;
         private float _targetHealthPercent = 1f;
 
         private void Start()
@@ -61,6 +69,7 @@ namespace MiniShooterGame.UI
             if (_playerHealth == null) _playerHealth = Object.FindFirstObjectByType<PlayerHealth>();
             if (_playerDash == null) _playerDash = Object.FindFirstObjectByType<PlayerDash>();
             if (_waveSpawner == null) _waveSpawner = Object.FindFirstObjectByType<WaveSpawner>();
+            if (_playerShooter == null) _playerShooter = Object.FindFirstObjectByType<PlayerShooter>();
         }
 
         private void InitializeGradient()
@@ -96,6 +105,25 @@ namespace MiniShooterGame.UI
                 _waveSpawner.OnWaveStarted.AddListener(OnWaveStarted);
                 _waveSpawner.OnEnemyCountChanged.AddListener(OnEnemyCountChanged);
                 OnWaveStarted(_waveSpawner.CurrentWaveNumber, $"Wave {_waveSpawner.CurrentWaveNumber}");
+            }
+
+            if (_playerShooter != null)
+            {
+                _playerShooter.OnWeaponEquipped += OnWeaponEquipped;
+                _playerShooter.OnAmmoUpdated += OnAmmoUpdated;
+                if (_playerShooter.CurrentWeapon != null)
+                {
+                    OnWeaponEquipped(_playerShooter.CurrentWeapon, _playerShooter.CurrentAmmo);
+                }
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (_playerShooter != null)
+            {
+                _playerShooter.OnWeaponEquipped -= OnWeaponEquipped;
+                _playerShooter.OnAmmoUpdated -= OnAmmoUpdated;
             }
         }
 
@@ -158,6 +186,31 @@ namespace MiniShooterGame.UI
             {
                 int totalLeft = alive + remainingToSpawn;
                 enemiesRemainingText.text = $"ENEMIES: <color=#FF3366>{totalLeft}</color>";
+            }
+        }
+
+        private void OnWeaponEquipped(Combat.WeaponDataSO weapon, int currentAmmo)
+        {
+            if (weaponNameText != null && weapon != null)
+            {
+                weaponNameText.text = weapon.weaponName.ToUpper();
+            }
+            OnAmmoUpdated(currentAmmo, weapon != null ? weapon.maxAmmo : -1);
+        }
+
+        private void OnAmmoUpdated(int currentAmmo, int maxAmmo)
+        {
+            if (ammoCountText != null)
+            {
+                if (maxAmmo <= 0)
+                {
+                    ammoCountText.text = "<color=#00E5FF>∞</color>";
+                }
+                else
+                {
+                    string colorHex = currentAmmo <= 5 ? "#FF3366" : "#FFD700";
+                    ammoCountText.text = $"<color={colorHex}>{currentAmmo}</color> / {maxAmmo}";
+                }
             }
         }
     }

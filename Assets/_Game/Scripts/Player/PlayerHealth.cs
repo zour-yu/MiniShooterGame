@@ -123,6 +123,17 @@ namespace MiniShooterGame.Player
             OnHealthChanged?.Invoke(_currentHealth, maxHealth);
         }
 
+        /// <summary>
+        /// Permanently boosts maximum health capacity and restores HP.
+        /// </summary>
+        public void IncreaseMaxHealth(float amount, bool healToFull = true)
+        {
+            maxHealth += amount;
+            if (healToFull) _currentHealth = maxHealth;
+            else _currentHealth += amount;
+            OnHealthChanged?.Invoke(_currentHealth, maxHealth);
+        }
+
         private IEnumerator DamageFlashRoutine()
         {
             if (_spriteRenderer == null) yield break;

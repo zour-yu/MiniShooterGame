@@ -82,14 +82,16 @@ namespace MiniShooterGame.Combat
         /// </summary>
         /// <param name="direction">Normalized travel direction.</param>
         /// <param name="shooterCollider">Optional collider of the entity that fired this projectile.</param>
-        /// <param name="customDamage">Optional override for damage (set <= 0 to use inspector default).</param>
-        /// <param name="customSpeed">Optional override for speed (set <= 0 to use inspector default).</param>
-        public void Initialize(Vector2 direction, Collider2D shooterCollider = null, float customDamage = -1f, float customSpeed = -1f)
+        /// <summary>
+        /// Initializes the projectile with direction, optional shooter collider to ignore, custom stats, and target tag.
+        /// </summary>
+        public void Initialize(Vector2 direction, Collider2D shooterCollider = null, float customDamage = -1f, float customSpeed = -1f, string customTargetTag = null)
         {
             _moveDirection = direction.normalized;
 
             if (customDamage > 0f) damage = customDamage;
             if (customSpeed > 0f) speed = customSpeed;
+            if (!string.IsNullOrEmpty(customTargetTag)) targetTag = customTargetTag;
 
             // Ignore collision with the shooter's own collider
             if (shooterCollider != null)
@@ -110,12 +112,21 @@ namespace MiniShooterGame.Combat
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            // Explicitly ignore the player and pickups
-            if (other.CompareTag("Player") || other.CompareTag("Pickup")) return;
+            // Explicitly ignore pickups
+            if (other.CompareTag("Pickup")) return;
+
+            // Prevent friendly fire
+            if (targetTag == "Enemy" && other.CompareTag("Player")) return;
+            if (targetTag == "Player" && other.CompareTag("Enemy")) return;
 
             // Hit an obstacle / solid cover (blocks bullet)
             if (other.CompareTag("Obstacle"))
             {
+                if (other.TryGetComponent<IDamageable>(out var damageable))
+                {
+                    damageable.TakeDamage(damage);
+                }
+
                 if (hitEffectPrefab != null)
                 {
                     Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
@@ -124,10 +135,9 @@ namespace MiniShooterGame.Combat
                 return;
             }
 
-            // Only interact with designated target tag (e.g. "Enemy")
-            if (other.CompareTag(targetTag))
+            // Interact with designated target tag (e.g. "Enemy" or "Player")
+            if (other.CompareTag(targetTag) || (targetTag == "Player" && other.GetComponent<MiniShooterGame.Player.PlayerHealth>() != null))
             {
-                // Inflict damage if target implements IDamageable
                 if (other.TryGetComponent<IDamageable>(out var damageable))
                 {
                     damageable.TakeDamage(damage);

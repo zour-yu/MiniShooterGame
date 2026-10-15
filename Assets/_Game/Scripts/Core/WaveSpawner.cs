@@ -35,10 +35,15 @@ namespace MiniShooterGame.Core
 
         [Header("Spawn Perimeter")]
         [Tooltip("Radius around the center/player where enemies spawn.")]
-        [SerializeField] private float spawnRadius = 16f;
+        [SerializeField] private float spawnRadius = 14f;
 
         [Tooltip("Optional transform center for spawning. If null, uses this transform or player.")]
         [SerializeField] private Transform spawnCenter;
+
+        [Header("Playable Island Bounds")]
+        [Tooltip("Min & Max coordinates to ensure enemies spawn on land inside the island boundaries.")]
+        [SerializeField] private Vector2 arenaMin = new Vector2(-16.5f, -10.5f);
+        [SerializeField] private Vector2 arenaMax = new Vector2(16.5f, 10.5f);
 
         [Header("Events")]
         public UnityEvent<int, string> OnWaveStarted; // (waveIndex, waveName)
@@ -167,13 +172,30 @@ namespace MiniShooterGame.Core
         {
             if (spawnCenter == null) FindSpawnCenter();
 
-            Vector2 origin = spawnCenter != null ? (Vector2)spawnCenter.position : (Vector2)transform.position;
-            float randomAngle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+            Vector2 playerPos = spawnCenter != null ? (Vector2)spawnCenter.position : Vector2.zero;
 
-            // Ensure enemies NEVER spawn directly on top of the player (minimum 12 units away)
-            float safeRadius = Mathf.Max(12f, spawnRadius);
-            Vector2 offset = new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle)) * safeRadius;
-            return origin + offset;
+            // Try up to 10 times to pick an inland spawn position with healthy clearance from player
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                float randomAngle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
+                float dist = Random.Range(7.5f, Mathf.Max(10f, spawnRadius));
+                Vector2 candidate = playerPos + new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle)) * dist;
+
+                // Clamp to island playable bounds
+                candidate.x = Mathf.Clamp(candidate.x, arenaMin.x, arenaMax.x);
+                candidate.y = Mathf.Clamp(candidate.y, arenaMin.y, arenaMax.y);
+
+                // Ensure it is at least 6 units away from player so enemies never tele-frag
+                if (Vector2.Distance(candidate, playerPos) >= 6f)
+                {
+                    return candidate;
+                }
+            }
+
+            // Fallback: spawn near an island edge furthest from the player
+            float fallbackX = playerPos.x > 0 ? arenaMin.x : arenaMax.x;
+            float fallbackY = Mathf.Clamp(playerPos.y + Random.Range(-4f, 4f), arenaMin.y, arenaMax.y);
+            return new Vector2(fallbackX, fallbackY);
         }
 
         private IEnumerator WaveCompletedRoutine()

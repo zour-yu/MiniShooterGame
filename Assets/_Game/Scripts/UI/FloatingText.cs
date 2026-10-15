@@ -51,6 +51,40 @@ namespace MiniShooterGame.UI
         }
 
         /// <summary>
+        /// Spawns a floating text notification popup at a world position.
+        /// </summary>
+        public static FloatingText Spawn(Vector3 position, string message, float customLifetime = 1.2f)
+        {
+            GameObject obj = new GameObject("FloatingText_Popup");
+            obj.transform.position = position;
+
+            TextMeshPro tm = obj.AddComponent<TextMeshPro>();
+            tm.text = message;
+            tm.fontSize = 4f;
+            tm.alignment = TextAlignmentOptions.Center;
+
+            FloatingText ft = obj.AddComponent<FloatingText>();
+            ft.lifetime = customLifetime;
+            ft.SetupCustom(message, customLifetime);
+            return ft;
+        }
+
+        public void SetupCustom(string message, float customLifetime)
+        {
+            if (_textMesh == null) _textMesh = GetComponent<TextMeshPro>();
+            _textMesh.text = message;
+            lifetime = customLifetime;
+
+            if (TryGetComponent<MeshRenderer>(out var meshRenderer))
+            {
+                meshRenderer.sortingOrder = sortingOrder;
+            }
+
+            _velocity = new Vector3(0f, upwardSpeed * 0.7f, 0f);
+            StartCoroutine(AnimateAndFadeRoutine(Color.white, 1.0f));
+        }
+
+        /// <summary>
         /// Initializes the floating text with damage amount and critical hit styling.
         /// </summary>
         /// <param name="damageAmount">Damage number to display.</param>

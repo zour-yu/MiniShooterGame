@@ -55,6 +55,14 @@ namespace MiniShooterGame.Player
         public float MoveSpeed => moveSpeed;
 
         /// <summary>
+        /// Permanently modifies player base move speed by a multiplier.
+        /// </summary>
+        public void ModifyMoveSpeed(float multiplier)
+        {
+            moveSpeed *= multiplier;
+        }
+
+        /// <summary>
         /// Normalized direction of the current input vector.
         /// </summary>
         public Vector2 CurrentInput => _currentInput;
@@ -144,6 +152,19 @@ namespace MiniShooterGame.Player
         /// </summary>
         private void ApplyRotation()
         {
+            // If shooting an enemy in range, prioritize aiming directly at the enemy
+            if (TryGetComponent<PlayerShooter>(out var shooter) && shooter.CurrentTarget != null)
+            {
+                Vector2 toTarget = (Vector2)shooter.CurrentTarget.position - _rb.position;
+                if (toTarget.sqrMagnitude > 0.001f)
+                {
+                    float aimAngle = Mathf.Atan2(toTarget.y, toTarget.x) * Mathf.Rad2Deg + spriteAngleOffset;
+                    float newAimAngle = Mathf.MoveTowardsAngle(_rb.rotation, aimAngle, smoothTurnSpeed * 1.5f * Time.fixedDeltaTime);
+                    _rb.MoveRotation(newAimAngle);
+                    return;
+                }
+            }
+
             if (!rotateTowardsMovement || _currentInput.sqrMagnitude < 0.001f) return;
 
             // Calculate target angle based on direction vector

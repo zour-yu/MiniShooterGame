@@ -65,6 +65,14 @@ namespace MiniShooterGame.Player
         /// </summary>
         public float CooldownProgress => Mathf.Clamp01((_lastDashTime + dashCooldown - Time.time) / dashCooldown);
 
+        /// <summary>
+        /// Permanently reduces dash cooldown duration.
+        /// </summary>
+        public void ReduceCooldown(float seconds)
+        {
+            dashCooldown = Mathf.Max(0.5f, dashCooldown - seconds);
+        }
+
         [Header("Editor & Desktop Controls")]
         [Tooltip("If enabled, allows keyboard keys (Space, Left Shift, E) and Right Mouse Click to trigger dash.")]
         [SerializeField] private bool allowKeyboardShortcut = true;
