@@ -48,6 +48,7 @@ namespace MiniShooterGame.UI
         [SerializeField] private Button[] cardButtons;
         [SerializeField] private TextMeshProUGUI[] cardTitleTexts;
         [SerializeField] private TextMeshProUGUI[] cardDescriptionTexts;
+        [SerializeField] private Image[] cardIconImages;
         [SerializeField] private TextMeshProUGUI[] cardIconTexts;
         [SerializeField] private Image[] cardBackgrounds;
 
@@ -72,7 +73,7 @@ namespace MiniShooterGame.UI
 
         private void Start()
         {
-            _waveSpawner = UnityEngine.Object.FindFirstObjectByType<WaveSpawner>();
+            _waveSpawner = WaveSpawner.Instance != null ? WaveSpawner.Instance : UnityEngine.Object.FindAnyObjectByType<WaveSpawner>();
             if (_waveSpawner != null)
             {
                 _waveSpawner.OnWaveCompleted.AddListener(OnWaveCompleted);
@@ -146,10 +147,18 @@ namespace MiniShooterGame.UI
 
         private void OnWaveCompleted(int waveNumber)
         {
-            // Do not show on the very final wave if game is won
-            if (_waveSpawner != null && _waveSpawner.CurrentWaveNumber >= _waveSpawner.TotalWaves) return;
+            try
+            {
+                // Do not show on the very final wave if game is won
+                if (_waveSpawner != null && _waveSpawner.CurrentWaveNumber >= _waveSpawner.TotalWaves) return;
 
-            PresentPerks();
+                PresentPerks();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[PerkSelectionManager] Exception during OnWaveCompleted: {ex}");
+                Time.timeScale = 1f; // Ensure timeScale is not stuck
+            }
         }
 
         /// <summary>
@@ -157,61 +166,135 @@ namespace MiniShooterGame.UI
         /// </summary>
         public void PresentPerks()
         {
-            FindPlayerReferences();
-
-            _currentOptions.Clear();
-            List<PerkOption> available = new List<PerkOption>(perkPool);
-
-            int countToPick = Mathf.Min(3, available.Count);
-            for (int i = 0; i < countToPick; i++)
+            try
             {
-                int idx = UnityEngine.Random.Range(0, available.Count);
-                _currentOptions.Add(available[idx]);
-                available.RemoveAt(idx);
-            }
+                FindPlayerReferences();
 
-            // Populate Card Slots
-            for (int i = 0; i < cardButtons.Length; i++)
-            {
-                if (i < _currentOptions.Count)
+                if (modalRoot != null)
                 {
-                    PerkOption perk = _currentOptions[i];
-                    cardButtons[i].gameObject.SetActive(true);
-
-                    if (cardTitleTexts != null && i < cardTitleTexts.Length && cardTitleTexts[i] != null)
-                        cardTitleTexts[i].text = perk.title;
-
-                    if (cardDescriptionTexts != null && i < cardDescriptionTexts.Length && cardDescriptionTexts[i] != null)
-                        cardDescriptionTexts[i].text = perk.description;
-
-                    if (cardIconTexts != null && i < cardIconTexts.Length && cardIconTexts[i] != null)
+                    var titleText = modalRoot.transform.Find("Title_Text")?.GetComponent<TextMeshProUGUI>();
+                    if (titleText != null)
                     {
-                        cardIconTexts[i].text = perk.iconSymbol;
-                        cardIconTexts[i].color = perk.accentColor;
+                        titleText.text = "<color=#FFD700><b>[ CHOOSE AN UPGRADE ]</b></color>";
+                        titleText.fontStyle = FontStyles.Bold;
+                        titleText.alignment = TextAlignmentOptions.Center;
                     }
-
-                    if (cardBackgrounds != null && i < cardBackgrounds.Length && cardBackgrounds[i] != null)
-                    {
-                        cardBackgrounds[i].color = new Color(0.12f, 0.14f, 0.18f, 0.95f);
-                    }
-
-                    int slotIndex = i;
-                    cardButtons[i].onClick.RemoveAllListeners();
-                    cardButtons[i].onClick.AddListener(() => SelectPerk(slotIndex));
                 }
-                else
+
+                Sprite[] customFrames = new Sprite[3]
                 {
-                    cardButtons[i].gameObject.SetActive(false);
+                    Resources.Load<Sprite>("UI/Card_Frame_Cyan"),
+                    Resources.Load<Sprite>("UI/Card_Frame_Purple"),
+                    Resources.Load<Sprite>("UI/Card_Frame_Yellow")
+                };
+
+                Sprite[] customIcons = new Sprite[3]
+                {
+                    Resources.Load<Sprite>("UI/Icon_Swift_Stride"),
+                    Resources.Load<Sprite>("UI/Icon_Flash_Step"),
+                    Resources.Load<Sprite>("UI/Icon_Rapid_Trigger")
+                };
+
+                string[] presetTitles = new string[3] { "Swift Stride", "Flash Step", "Rapid Trigger" };
+                string[] presetDescs = new string[3]
+                {
+                    "+20% Movement Speed across all terrain.",
+                    "-0.4s Dash Cooldown for nimble evasions.",
+                    "+25% Faster Attack Rate permanently."
+                };
+                PerkType[] presetTypes = new PerkType[3] { PerkType.MoveSpeed, PerkType.DashCooldown, PerkType.FireRate };
+
+                _currentOptions.Clear();
+                for (int i = 0; i < 3; i++)
+                {
+                    _currentOptions.Add(new PerkOption
+                    {
+                        type = presetTypes[i],
+                        title = presetTitles[i],
+                        description = presetDescs[i]
+                    });
                 }
-            }
 
-            if (modalRoot != null)
+                // Populate Card Slots matching Concept Art
+                for (int i = 0; i < cardButtons.Length; i++)
+                {
+                    if (i < _currentOptions.Count)
+                    {
+                        PerkOption perk = _currentOptions[i];
+                        cardButtons[i].gameObject.SetActive(true);
+
+                        var rt = cardButtons[i].GetComponent<RectTransform>();
+                        if (rt != null) rt.sizeDelta = new Vector2(310f, 440f);
+
+                        if (cardTitleTexts != null && i < cardTitleTexts.Length && cardTitleTexts[i] != null)
+                        {
+                            cardTitleTexts[i].text = perk.title;
+                            cardTitleTexts[i].fontStyle = FontStyles.Bold;
+                            cardTitleTexts[i].color = Color.white;
+                        }
+
+                        if (cardDescriptionTexts != null && i < cardDescriptionTexts.Length && cardDescriptionTexts[i] != null)
+                        {
+                            cardDescriptionTexts[i].text = perk.description;
+                            cardDescriptionTexts[i].color = new Color(0.85f, 0.88f, 0.94f);
+                        }
+
+                        // Attach graphic icon sprite safely without Graphic component collision
+                        Image iconImg = null;
+                        if (cardIconImages != null && i < cardIconImages.Length && cardIconImages[i] != null)
+                        {
+                            iconImg = cardIconImages[i];
+                        }
+                        else if (cardIconTexts != null && i < cardIconTexts.Length && cardIconTexts[i] != null)
+                        {
+                            iconImg = cardIconTexts[i].GetComponent<Image>();
+                        }
+
+                        if (iconImg != null)
+                        {
+                            if (customIcons[i] != null) iconImg.sprite = customIcons[i];
+                            iconImg.enabled = true;
+                            iconImg.color = Color.white;
+
+                            var iconRt = iconImg.GetComponent<RectTransform>();
+                            if (iconRt != null) iconRt.sizeDelta = new Vector2(110f, 110f);
+                        }
+
+                        // Clear out old text if TMP is present
+                        if (cardIconTexts != null && i < cardIconTexts.Length && cardIconTexts[i] != null)
+                        {
+                            cardIconTexts[i].text = "";
+                        }
+
+                        if (cardBackgrounds != null && i < cardBackgrounds.Length && cardBackgrounds[i] != null)
+                        {
+                            if (customFrames[i] != null) cardBackgrounds[i].sprite = customFrames[i];
+                            cardBackgrounds[i].color = Color.white;
+                        }
+
+                        int slotIndex = i;
+                        cardButtons[i].onClick.RemoveAllListeners();
+                        cardButtons[i].onClick.AddListener(() => SelectPerk(slotIndex));
+                    }
+                    else
+                    {
+                        cardButtons[i].gameObject.SetActive(false);
+                    }
+                }
+
+                if (modalRoot != null)
+                {
+                    modalRoot.SetActive(true);
+                }
+
+                // Pause game for selection
+                Time.timeScale = 0f;
+            }
+            catch (Exception ex)
             {
-                modalRoot.SetActive(true);
+                Debug.LogError($"[PerkSelectionManager] Exception during PresentPerks: {ex}");
+                Time.timeScale = 1f;
             }
-
-            // Pause game for selection
-            Time.timeScale = 0f;
         }
 
         private void SelectPerk(int optionIndex)

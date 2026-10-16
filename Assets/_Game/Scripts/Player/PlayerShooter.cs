@@ -276,6 +276,11 @@ namespace MiniShooterGame.Player
             }
 
             // Visual feedback
+            if (TryGetComponent<CharacterVisualController>(out var visual))
+            {
+                visual.TriggerRecoil();
+            }
+
             if (muzzleFlash != null)
             {
                 muzzleFlash.Play();

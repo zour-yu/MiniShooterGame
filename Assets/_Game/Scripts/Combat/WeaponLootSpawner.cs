@@ -48,7 +48,7 @@ namespace MiniShooterGame.Combat
 
         private void Start()
         {
-            _waveSpawner = Object.FindFirstObjectByType<WaveSpawner>();
+            _waveSpawner = WaveSpawner.Instance != null ? WaveSpawner.Instance : Object.FindAnyObjectByType<WaveSpawner>();
             if (_waveSpawner != null && spawnOnWaveComplete)
             {
                 _waveSpawner.OnWaveCompleted.AddListener(OnWaveCompleted);
@@ -67,6 +67,25 @@ namespace MiniShooterGame.Combat
         {
             // Clean up destroyed crates from list
             _activeCrates.RemoveAll(c => c == null);
+
+            // Ensure any active crate has the glowing padlock indicator
+            for (int i = 0; i < _activeCrates.Count; i++)
+            {
+                var p = _activeCrates[i];
+                if (p != null && p.transform.Find("Padlock_Indicator") == null)
+                {
+                    GameObject lockObj = new GameObject("Padlock_Indicator");
+                    lockObj.transform.SetParent(p.transform, false);
+                    lockObj.transform.localPosition = new Vector3(0f, -0.12f, 0f);
+                    lockObj.transform.localScale = new Vector3(0.55f, 0.55f, 1f);
+                    SpriteRenderer lockSr = lockObj.AddComponent<SpriteRenderer>();
+                    Sprite padlockSprite = Resources.Load<Sprite>("UI/Padlock_Cyan");
+                    if (padlockSprite != null) lockSr.sprite = padlockSprite;
+                    lockSr.sortingLayerName = "Default";
+                    lockSr.sortingOrder = 95;
+                    lockSr.color = Color.white;
+                }
+            }
 
             _dropTimer -= Time.deltaTime;
             if (_dropTimer <= 0f)
@@ -146,6 +165,18 @@ namespace MiniShooterGame.Combat
 
             WeaponPickup pickup = obj.AddComponent<WeaponPickup>();
             pickup.Initialize(weapon);
+
+            // Holographic Cyan Padlock from Concept Art
+            GameObject lockObj = new GameObject("Padlock_Indicator");
+            lockObj.transform.SetParent(obj.transform, false);
+            lockObj.transform.localPosition = new Vector3(0f, -0.12f, 0f);
+            lockObj.transform.localScale = new Vector3(0.55f, 0.55f, 1f);
+            SpriteRenderer lockSr = lockObj.AddComponent<SpriteRenderer>();
+            Sprite padlockSprite = Resources.Load<Sprite>("UI/Padlock_Cyan");
+            if (padlockSprite != null) lockSr.sprite = padlockSprite;
+            lockSr.sortingLayerName = "Default";
+            lockSr.sortingOrder = 95;
+            lockSr.color = Color.white;
 
             return obj;
         }

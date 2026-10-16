@@ -152,6 +152,12 @@ namespace MiniShooterGame.Player
         /// </summary>
         private void ApplyRotation()
         {
+            if (!rotateTowardsMovement)
+            {
+                if (_rb.rotation != 0f) _rb.MoveRotation(0f);
+                return;
+            }
+
             // If shooting an enemy in range, prioritize aiming directly at the enemy
             if (TryGetComponent<PlayerShooter>(out var shooter) && shooter.CurrentTarget != null)
             {

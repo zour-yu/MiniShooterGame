@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Weapon_AssaultRifle
   m_EditorClassIdentifier: Assembly-CSharp::MiniShooterGame.Combat.WeaponDataSO
   weaponName: Assault Rifle
-  weaponIcon: {fileID: 0}
+  weaponIcon: {fileID: 21300000, guid: e1000000000000000000000000000002, type: 3}
   fireRate: 7.5
   damage: 18
   projectileSpeed: 20

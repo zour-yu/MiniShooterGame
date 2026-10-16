@@ -102,6 +102,13 @@ namespace MiniShooterGame.Editor
             // 4. Setup Tactical Cover & Obstacle Props
             SetupTacticalCover(stageRoot);
 
+            // 4.5 Ensure Player Exists in Scene
+            GameObject player = GameObject.FindWithTag("Player");
+            if (player == null)
+            {
+                player = PlayerPrefabBuilder.SpawnPlayerInScene();
+            }
+
             // 5. Configure Camera (Action View)
             ConfigureCamera();
 
@@ -865,17 +872,25 @@ namespace MiniShooterGame.Editor
             cam.orthographic = true;
             cam.orthographicSize = 6.5f;
 
-            if (cam.TryGetComponent<CameraFollow2D>(out var follow))
+            if (!cam.TryGetComponent<CameraFollow2D>(out var follow))
             {
-                Undo.RecordObject(follow, "Configure CameraFollow2D Bounds");
-                SerializedObject serializedFollow = new SerializedObject(follow);
-                serializedFollow.FindProperty("clampToBounds").boolValue = true;
-                serializedFollow.FindProperty("minBounds").vector2Value = new Vector2(-12.5f, -7.0f);
-                serializedFollow.FindProperty("maxBounds").vector2Value = new Vector2(12.5f, 7.0f);
-                serializedFollow.FindProperty("enableLookAhead").boolValue = true;
-                serializedFollow.FindProperty("lookAheadDistance").floatValue = 1.2f;
-                serializedFollow.ApplyModifiedProperties();
+                follow = cam.gameObject.AddComponent<CameraFollow2D>();
             }
+
+            Undo.RecordObject(follow, "Configure CameraFollow2D Bounds");
+            SerializedObject serializedFollow = new SerializedObject(follow);
+            GameObject player = GameObject.FindWithTag("Player");
+            if (player != null)
+            {
+                serializedFollow.FindProperty("target").objectReferenceValue = player.transform;
+            }
+            serializedFollow.FindProperty("cameraZoom").floatValue = 6.5f;
+            serializedFollow.FindProperty("clampToBounds").boolValue = true;
+            serializedFollow.FindProperty("minBounds").vector2Value = new Vector2(-12.5f, -7.0f);
+            serializedFollow.FindProperty("maxBounds").vector2Value = new Vector2(12.5f, 7.0f);
+            serializedFollow.FindProperty("enableLookAhead").boolValue = true;
+            serializedFollow.FindProperty("lookAheadDistance").floatValue = 1.2f;
+            serializedFollow.ApplyModifiedProperties();
         }
 
         private static WeaponDataSO[] EnsureWeaponAssetsExist()
@@ -1108,53 +1123,13 @@ namespace MiniShooterGame.Editor
 
         private static void SetupHUD(GameObject stageRoot)
         {
+            GameHUDBuilder.BuildHUD(false);
+
             Canvas canvas = Object.FindFirstObjectByType<Canvas>();
             if (canvas == null) return;
 
-            CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
-            if (scaler != null)
-            {
-                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-                scaler.referenceResolution = new Vector2(1920, 1080);
-                scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-                scaler.matchWidthOrHeight = 0.5f;
-            }
-
-            Transform hudTransform = canvas.transform.Find("[Player_HUD]");
-            GameObject hudObj = hudTransform != null ? hudTransform.gameObject : new GameObject("[Player_HUD]");
-            if (hudTransform == null)
-            {
-                hudObj.transform.SetParent(canvas.transform, false);
-                Undo.RegisterCreatedObjectUndo(hudObj, "Create Player HUD");
-            }
-
-            RectTransform hudRect = hudObj.GetComponent<RectTransform>();
-            if (hudRect == null) hudRect = hudObj.AddComponent<RectTransform>();
-            hudRect.anchorMin = Vector2.zero;
-            hudRect.anchorMax = Vector2.one;
-            hudRect.offsetMin = Vector2.zero;
-            hudRect.offsetMax = Vector2.zero;
-
-            PlayerHUD playerHUD = hudObj.GetComponent<PlayerHUD>();
-            if (playerHUD == null) playerHUD = hudObj.AddComponent<PlayerHUD>();
-
-            // Setup Top-Left Health Bar
-            SetupHealthBar(hudObj);
-
-            // Setup Weapon & Ammo Info Badge below Health Bar
-            SetupWeaponHUD(hudObj);
-
-            // Setup Top-Center Wave Display
-            SetupWaveDisplay(hudObj);
-
-            // Setup Low Health Vignette
-            SetupVignette(hudObj);
-
             // Setup Post-Wave Perk Modal
             SetupPerkModal(canvas, stageRoot);
-
-            // Enlarge Dash Button
-            EnlargeDashButton(canvas);
         }
 
         private static void SetupHealthBar(GameObject hudParent)

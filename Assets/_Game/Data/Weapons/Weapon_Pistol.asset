@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Weapon_Pistol
   m_EditorClassIdentifier: Assembly-CSharp::MiniShooterGame.Combat.WeaponDataSO
   weaponName: Pistol
-  weaponIcon: {fileID: 0}
+  weaponIcon: {fileID: 21300000, guid: e1000000000000000000000000000001, type: 3}
   fireRate: 3.5
   damage: 15
   projectileSpeed: 16

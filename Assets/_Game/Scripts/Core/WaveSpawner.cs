@@ -56,6 +56,9 @@ namespace MiniShooterGame.Core
         private bool _isSpawning;
         private bool _allWavesCleared;
 
+        private static WaveSpawner _instance;
+        public static WaveSpawner Instance => _instance;
+
         /// <summary>
         /// 1-based current wave number.
         /// </summary>
@@ -70,6 +73,27 @@ namespace MiniShooterGame.Core
         /// Count of currently alive active enemies.
         /// </summary>
         public int ActiveEnemyCount => _activeEnemies.Count;
+
+        /// <summary>
+        /// Total enemies planned for the current wave.
+        /// </summary>
+        public int CurrentWaveTargetTotal => GetCurrentWaveTotal();
+
+        private void Awake()
+        {
+            if (_instance != null && _instance != this)
+            {
+                Debug.LogWarning($"[WaveSpawner] Duplicate WaveSpawner detected on {gameObject.name}. Destroying duplicate.");
+                Destroy(gameObject);
+                return;
+            }
+            _instance = this;
+
+            // Enforce tight playable island bounds so enemies NEVER spawn in river water (river starts at x > 8.0)
+            arenaMin = new Vector2(-12.0f, -7.0f);
+            arenaMax = new Vector2(7.5f, 7.0f);
+            spawnRadius = 8.5f;
+        }
 
         private void Start()
         {
@@ -107,8 +131,33 @@ namespace MiniShooterGame.Core
 
         private void Update()
         {
+            int prevCount = _activeEnemies.Count;
             // Clean up destroyed enemies from active list
             _activeEnemies.RemoveAll(e => e == null);
+
+            // Safety Watchdog: relocate any enemy that got pushed into the river water (x > 8.0)
+            Vector2 playerPos = spawnCenter != null ? (Vector2)spawnCenter.position : Vector2.zero;
+            for (int i = 0; i < _activeEnemies.Count; i++)
+            {
+                GameObject enemy = _activeEnemies[i];
+                if (enemy == null) continue;
+
+                Vector2 pos = enemy.transform.position;
+                if (pos.x > 8.0f || pos.x < -14.0f || pos.y > 8.5f || pos.y < -8.5f)
+                {
+                    Vector2 dirToPlayer = (playerPos - pos).normalized;
+                    if (dirToPlayer == Vector2.zero) dirToPlayer = Vector2.left;
+                    enemy.transform.position = playerPos - dirToPlayer * 5.0f;
+                    Debug.Log($"[WaveSpawner] Relocated out-of-bounds enemy {enemy.name} back onto the grass island.");
+                }
+            }
+
+            // Immediately notify HUD when an enemy is killed!
+            if (prevCount != _activeEnemies.Count)
+            {
+                int remainingToSpawn = Mathf.Max(0, GetCurrentWaveTotal() - _enemiesSpawnedThisWave);
+                OnEnemyCountChanged?.Invoke(_activeEnemies.Count, remainingToSpawn);
+            }
 
             // Check if current wave is completed
             if (!_isSpawning && !_allWavesCleared && _activeEnemies.Count == 0 && _enemiesSpawnedThisWave >= GetCurrentWaveTotal())
@@ -141,6 +190,7 @@ namespace MiniShooterGame.Core
 
             Debug.Log($"[WaveSpawner] Starting {currentWave.waveName} ({currentWave.totalEnemies} enemies)");
             OnWaveStarted?.Invoke(waveIndex + 1, currentWave.waveName);
+            OnEnemyCountChanged?.Invoke(0, currentWave.totalEnemies);
 
             while (_enemiesSpawnedThisWave < currentWave.totalEnemies)
             {
@@ -152,6 +202,10 @@ namespace MiniShooterGame.Core
             }
 
             _isSpawning = false;
+
+            // In case all spawned enemies were already defeated during spawning
+            int remainingToSpawnAfter = Mathf.Max(0, currentWave.totalEnemies - _enemiesSpawnedThisWave);
+            OnEnemyCountChanged?.Invoke(_activeEnemies.Count, remainingToSpawnAfter);
         }
 
         private void SpawnRandomEnemy(WaveData wave)
@@ -174,27 +228,26 @@ namespace MiniShooterGame.Core
 
             Vector2 playerPos = spawnCenter != null ? (Vector2)spawnCenter.position : Vector2.zero;
 
-            // Try up to 10 times to pick an inland spawn position with healthy clearance from player
-            for (int attempt = 0; attempt < 10; attempt++)
+            // Pick an inland spawn position strictly on the grass island
+            for (int attempt = 0; attempt < 12; attempt++)
             {
                 float randomAngle = Random.Range(0f, 360f) * Mathf.Deg2Rad;
-                float dist = Random.Range(7.5f, Mathf.Max(10f, spawnRadius));
+                float dist = Random.Range(5.5f, Mathf.Max(7.0f, spawnRadius));
                 Vector2 candidate = playerPos + new Vector2(Mathf.Cos(randomAngle), Mathf.Sin(randomAngle)) * dist;
 
-                // Clamp to island playable bounds
+                // Clamp to grass island bounds (keeps enemies completely away from river)
                 candidate.x = Mathf.Clamp(candidate.x, arenaMin.x, arenaMax.x);
                 candidate.y = Mathf.Clamp(candidate.y, arenaMin.y, arenaMax.y);
 
-                // Ensure it is at least 6 units away from player so enemies never tele-frag
-                if (Vector2.Distance(candidate, playerPos) >= 6f)
+                if (Vector2.Distance(candidate, playerPos) >= 5f)
                 {
                     return candidate;
                 }
             }
 
-            // Fallback: spawn near an island edge furthest from the player
-            float fallbackX = playerPos.x > 0 ? arenaMin.x : arenaMax.x;
-            float fallbackY = Mathf.Clamp(playerPos.y + Random.Range(-4f, 4f), arenaMin.y, arenaMax.y);
+            // Fallback: spawn on left grass side
+            float fallbackX = Mathf.Clamp(playerPos.x - 6.0f, arenaMin.x, arenaMax.x);
+            float fallbackY = Mathf.Clamp(playerPos.y + Random.Range(-3f, 3f), arenaMin.y, arenaMax.y);
             return new Vector2(fallbackX, fallbackY);
         }
 
@@ -202,9 +255,29 @@ namespace MiniShooterGame.Core
         {
             _isSpawning = true; // Prevent multiple triggers
             Debug.Log($"[WaveSpawner] Wave {CurrentWaveNumber} Cleared!");
-            OnWaveCompleted?.Invoke(_currentWaveIndex + 1);
 
-            yield return new WaitForSeconds(timeBetweenWaves);
+            try
+            {
+                OnWaveCompleted?.Invoke(_currentWaveIndex + 1);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[WaveSpawner] Error during OnWaveCompleted invocation: {ex}");
+            }
+
+            // Wait while game is paused in perk selection modal
+            while (Time.timeScale == 0f)
+            {
+                yield return null;
+            }
+
+            // Short, punchy 1.2s breather before the next wave kicks off
+            float breather = 1.2f;
+            while (breather > 0f)
+            {
+                if (Time.timeScale > 0f) breather -= Time.unscaledDeltaTime;
+                yield return null;
+            }
 
             _currentWaveIndex++;
             if (_currentWaveIndex < waves.Count)
