@@ -61,6 +61,10 @@ namespace MiniShooterGame.Combat
 
         [Tooltip("Local position of the muzzle tip relative to weapon pivot for projectile spawns and muzzle flashes.")]
         public Vector2 muzzleOffset = new Vector2(0.5f, 0.05f);
+
+        [Header("Physics Impact")]
+        [Tooltip("Impulse knockback force delivered to struck enemies.")]
+        public float knockbackForce = 4.5f;
     }
 }
 

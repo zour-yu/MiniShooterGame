@@ -41,11 +41,21 @@ namespace MiniShooterGame.Enemy
         [Tooltip("Optional explosion particle effect prefab instantiated upon death.")]
         [SerializeField] private GameObject deathEffectPrefab;
 
+        [Header("Physics & Resistance")]
+        [Tooltip("Knockback resistance factor (0.0 = full knockback, 1.0 = immovable tank).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float knockbackResistance = 0f;
+
         private float _currentHealth;
         private SpriteRenderer _spriteRenderer;
         private Color _originalSpriteColor;
         private Coroutine _flashCoroutine;
+        private Coroutine _squashCoroutine;
+        private Vector3 _originalScale = Vector3.one;
         private bool _isDead;
+
+        public event System.Action<float> OnDamaged;
+        public event System.Action OnDied;
 
         /// <summary>
         /// Current health value.
@@ -58,6 +68,15 @@ namespace MiniShooterGame.Enemy
         public float MaxHealth => maxHealth;
 
         /// <summary>
+        /// Knockback resistance (0.0 to 1.0).
+        /// </summary>
+        public float KnockbackResistance
+        {
+            get => knockbackResistance;
+            set => knockbackResistance = Mathf.Clamp01(value);
+        }
+
+        /// <summary>
         /// Normalized health percentage (0.0 to 1.0).
         /// </summary>
         public float HealthPercent => Mathf.Clamp01(_currentHealth / Mathf.Max(1f, maxHealth));
@@ -66,6 +85,7 @@ namespace MiniShooterGame.Enemy
         {
             _currentHealth = maxHealth;
             _spriteRenderer = GetComponent<SpriteRenderer>();
+            _originalScale = transform.localScale;
 
             if (_spriteRenderer != null)
             {
@@ -74,26 +94,75 @@ namespace MiniShooterGame.Enemy
         }
 
         /// <summary>
-        /// IDamageable implementation: applies damage, triggers feedback, and evaluates death.
+        /// IDamageable implementation: applies damage without direction.
         /// </summary>
-        /// <param name="damage">Amount of incoming damage.</param>
         public void TakeDamage(float damage)
+        {
+            TakeDamage(damage, Vector2.zero, 0f);
+        }
+
+        /// <summary>
+        /// Overload applying incoming damage, physical knockback impulse, hit-stun, and juice feedback.
+        /// </summary>
+        public void TakeDamage(float damage, Vector2 hitDirection, float knockbackForce)
         {
             if (_isDead) return;
 
             _currentHealth = Mathf.Max(0f, _currentHealth - damage);
 
-            // 1. Spawn Floating Damage Text
+            // 1. Deliver physics knockback to active enemy movement script
+            if (knockbackForce > 0f && hitDirection.sqrMagnitude > 0.001f)
+            {
+                float effectiveForce = knockbackForce * (1f - knockbackResistance);
+                if (effectiveForce > 0.1f)
+                {
+                    SendMessage("ApplyKnockback", new object[] { hitDirection, effectiveForce, 0.12f }, SendMessageOptions.DontRequireReceiver);
+                }
+            }
+
+            // 2. Spawn Floating Damage Text
             SpawnDamageText(damage);
 
-            // 2. Trigger Flash Effect
+            // 3. Trigger Flash Effect & Squash Juice
             TriggerHitFlash();
+            TriggerHitSquash();
 
-            // 3. Evaluate Death
+            OnDamaged?.Invoke(damage);
+
+            // 4. Evaluate Death
             if (_currentHealth <= 0f)
             {
                 Die();
             }
+        }
+
+        private void TriggerHitSquash()
+        {
+            if (!gameObject.activeInHierarchy) return;
+
+            if (_squashCoroutine != null)
+            {
+                StopCoroutine(_squashCoroutine);
+            }
+            _squashCoroutine = StartCoroutine(HitSquashRoutine());
+        }
+
+        private IEnumerator HitSquashRoutine()
+        {
+            Vector3 squashed = Vector3.Scale(_originalScale, new Vector3(1.22f, 0.82f, 1f));
+            transform.localScale = squashed;
+
+            float elapsed = 0f;
+            float duration = 0.12f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                transform.localScale = Vector3.Lerp(squashed, _originalScale, elapsed / duration);
+                yield return null;
+            }
+
+            transform.localScale = _originalScale;
+            _squashCoroutine = null;
         }
 
         private void SpawnDamageText(float damage)
@@ -113,7 +182,7 @@ namespace MiniShooterGame.Enemy
 
         private void TriggerHitFlash()
         {
-            if (_spriteRenderer == null) return;
+            if (_spriteRenderer == null || !gameObject.activeInHierarchy) return;
 
             if (_flashCoroutine != null)
             {
@@ -135,6 +204,8 @@ namespace MiniShooterGame.Enemy
         {
             if (_isDead) return;
             _isDead = true;
+
+            OnDied?.Invoke();
 
             // 1. Check and spawn loot drop
             TrySpawnLoot();

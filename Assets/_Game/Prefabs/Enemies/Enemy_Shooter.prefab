@@ -195,13 +195,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MiniShooterGame.Enemy.RangedShooterEnemy
   moveSpeed: 2.8
   preferredDistance: 6
-  retreatDistance: 4
+  retreatDistance: 3.8
   rotationSpeed: 300
   spriteAngleOffset: -90
-  enemyProjectilePrefab: {fileID: 0}
+  separationRadius: 1.3
+  separationWeight: 0.6
+  enemyProjectilePrefab: {fileID: 45703b9922b00aa409cdf91c7aa75a3e, guid: 45703b9922b00aa409cdf91c7aa75a3e, type: 3}
   firePoint: {fileID: 0}
-  fireInterval: 2.2
+  fireInterval: 2.4
   projectileDamage: 12
-  projectileSpeed: 10
-  spriteRenderer: {fileID: 0}
+  projectileSpeed: 11
+  spriteRenderer: {fileID: 9130471167187416665}
   aimTelegraphColor: {r: 1, g: 0.4, b: 0.2, a: 1}
+  telegraphDuration: 0.55

@@ -174,8 +174,16 @@ MonoBehaviour:
   moveSpeed: 3.5
   rotationSpeed: 360
   spriteAngleOffset: -90
+  separationRadius: 1.1
+  separationWeight: 0.65
+  canLunge: 1
+  lungeTriggerDistance: 2.2
+  lungeSpeedMultiplier: 2.6
+  lungeWindupDuration: 0.22
+  lungeDuration: 0.20
+  lungeCooldown: 2.5
   contactDamage: 15
-  attackCooldown: 1
+  attackCooldown: 0.8
 --- !u!114 &5745042731004405968
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -288,6 +288,7 @@ namespace MiniShooterGame.Player
             float spreadAngle = currentWeapon != null ? currentWeapon.spreadAngle : 0f;
             float damage = (currentWeapon != null ? currentWeapon.damage : 15f) * _damageMultiplier;
             float speed = currentWeapon != null ? currentWeapon.projectileSpeed : 16f;
+            float knockback = currentWeapon != null ? currentWeapon.knockbackForce : 4.5f;
 
             for (int i = 0; i < pellets; i++)
             {
@@ -306,7 +307,7 @@ namespace MiniShooterGame.Player
                 GameObject projObj = Instantiate(prefabToUse, spawnPosition, Quaternion.identity);
                 if (projObj.TryGetComponent<Projectile>(out var projectile))
                 {
-                    projectile.Initialize(firedDirection, _playerCollider, damage, speed);
+                    projectile.Initialize(firedDirection, _playerCollider, damage, speed, "Enemy", knockback);
                 }
             }
 

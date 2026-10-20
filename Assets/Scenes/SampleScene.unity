@@ -336,23 +336,38 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MiniShooterGame.Core.WaveSpawner
   waves:
-  - waveName: Wave 1 - Island Outbreak
+  - waveName: Wave 1 - Zombie Outbreak
     enemyPrefabs:
     - {fileID: 5965952227506311519, guid: 16f30103c18151247bc5806d6bb1cdaf, type: 3}
-    totalEnemies: 6
-    spawnInterval: 1.2
-  - waveName: Wave 2 - Rogue Mercenaries
-    enemyPrefabs:
-    - {fileID: 5965952227506311519, guid: 16f30103c18151247bc5806d6bb1cdaf, type: 3}
-    - {fileID: 5758520044982824950, guid: 289bea5359841a949b53aa6301fdb690, type: 3}
-    totalEnemies: 10
-    spawnInterval: 1.2
-  - waveName: Wave 3 - Total Invasion
+    totalEnemies: 8
+    spawnInterval: 1.5
+  - waveName: Wave 2 - Sniper Ambush
     enemyPrefabs:
     - {fileID: 5965952227506311519, guid: 16f30103c18151247bc5806d6bb1cdaf, type: 3}
     - {fileID: 5758520044982824950, guid: 289bea5359841a949b53aa6301fdb690, type: 3}
-    totalEnemies: 16
-    spawnInterval: 1
+    totalEnemies: 12
+    spawnInterval: 1.3
+  - waveName: Wave 3 - Toxic Volatiles
+    enemyPrefabs:
+    - {fileID: 5965952227506311519, guid: 16f30103c18151247bc5806d6bb1cdaf, type: 3}
+    - {fileID: 8100000000000001, guid: 9c20dd33bcde4098cdef234567890bcd, type: 3}
+    totalEnemies: 14
+    spawnInterval: 1.1
+  - waveName: Wave 4 - Combined Assault
+    enemyPrefabs:
+    - {fileID: 5965952227506311519, guid: 16f30103c18151247bc5806d6bb1cdaf, type: 3}
+    - {fileID: 5758520044982824950, guid: 289bea5359841a949b53aa6301fdb690, type: 3}
+    - {fileID: 8100000000000001, guid: 9c20dd33bcde4098cdef234567890bcd, type: 3}
+    totalEnemies: 18
+    spawnInterval: 0.95
+  - waveName: Wave 5 - Ironclad Titan Invasion
+    enemyPrefabs:
+    - {fileID: 5965952227506311519, guid: 16f30103c18151247bc5806d6bb1cdaf, type: 3}
+    - {fileID: 5758520044982824950, guid: 289bea5359841a949b53aa6301fdb690, type: 3}
+    - {fileID: 8100000000000001, guid: 9c20dd33bcde4098cdef234567890bcd, type: 3}
+    - {fileID: 7100000000000001, guid: 8b10cc22abcd4987bcde123456789abc, type: 3}
+    totalEnemies: 22
+    spawnInterval: 0.85
   timeBetweenWaves: 3
   spawnRadius: 8.5
   spawnCenter: {fileID: 0}

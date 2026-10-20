@@ -27,5 +27,6 @@ MonoBehaviour:
   supportHandOffset: {x: 0.38, y: -0.02}
   stockForwardOffset: 0
   muzzleOffset: {x: 0.42, y: 0.06}
+  knockbackForce: 4.5
 
 

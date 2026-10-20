@@ -16,6 +16,9 @@ namespace MiniShooterGame.Combat
         [Tooltip("Damage dealt upon hitting an enemy.")]
         [SerializeField] private float damage = 10f;
 
+        [Tooltip("Knockback force applied to struck enemies.")]
+        [SerializeField] private float knockbackForce = 4.5f;
+
         [Tooltip("Time in seconds before the projectile self-destructs if it hits nothing.")]
         [SerializeField] private float lifetime = 3f;
 
@@ -85,13 +88,14 @@ namespace MiniShooterGame.Combat
         /// <summary>
         /// Initializes the projectile with direction, optional shooter collider to ignore, custom stats, and target tag.
         /// </summary>
-        public void Initialize(Vector2 direction, Collider2D shooterCollider = null, float customDamage = -1f, float customSpeed = -1f, string customTargetTag = null)
+        public void Initialize(Vector2 direction, Collider2D shooterCollider = null, float customDamage = -1f, float customSpeed = -1f, string customTargetTag = null, float customKnockback = -1f)
         {
             _moveDirection = direction.normalized;
 
             if (customDamage > 0f) damage = customDamage;
             if (customSpeed > 0f) speed = customSpeed;
             if (!string.IsNullOrEmpty(customTargetTag)) targetTag = customTargetTag;
+            if (customKnockback >= 0f) knockbackForce = customKnockback;
 
             // Ignore collision with the shooter's own collider
             if (shooterCollider != null)
@@ -138,7 +142,11 @@ namespace MiniShooterGame.Combat
             // Interact with designated target tag (e.g. "Enemy" or "Player")
             if (other.CompareTag(targetTag) || (targetTag == "Player" && other.GetComponent<MiniShooterGame.Player.PlayerHealth>() != null))
             {
-                if (other.TryGetComponent<IDamageable>(out var damageable))
+                if (other.TryGetComponent<Enemy.EnemyHealth>(out var enemyHealth))
+                {
+                    enemyHealth.TakeDamage(damage, _moveDirection, knockbackForce);
+                }
+                else if (other.TryGetComponent<IDamageable>(out var damageable))
                 {
                     damageable.TakeDamage(damage);
                 }
