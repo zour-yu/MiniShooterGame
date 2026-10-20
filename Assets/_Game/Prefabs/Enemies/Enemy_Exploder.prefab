@@ -90,7 +90,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.609375, y: 0.671875}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -179,6 +179,7 @@ MonoBehaviour:
   dropChance: 0.35
   lootPrefabs:
   - {fileID: 1574605788615916794, guid: 8c97e0e24b2040b42ab4d596fc6f2107, type: 3}
+  - {fileID: 1574605788615916794, guid: a86efbfaa54778e43870c9610a38cd28, type: 3}
   deathEffectPrefab: {fileID: 0}
   knockbackResistance: 0
 --- !u!114 &8100000000000007

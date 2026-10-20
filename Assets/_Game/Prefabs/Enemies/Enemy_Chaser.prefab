@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 2216451365451574376}
   - component: {fileID: 3280538415438819164}
   - component: {fileID: 4708856767680287975}
-  - component: {fileID: 889657675764831785}
   - component: {fileID: 5745042731004405968}
+  - component: {fileID: 889657675764831785}
   m_Layer: 0
   m_Name: Enemy_Chaser
   m_TagString: Enemy
@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 5965952227506311519}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 274.13596, y: 259.50113, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -83,14 +83,14 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 4
+  m_SortingOrder: 148
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 3dd5ac4e7e9245e4a643c3cf76a6e8d6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.546875, y: 0.671875}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -119,7 +119,7 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
@@ -158,7 +158,30 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.515
+  m_Radius: 0.5
+--- !u!114 &5745042731004405968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5965952227506311519}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acb8d172033a82c4d90e1ada0268da99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MiniShooterGame.Enemy.EnemyHealth
+  maxHealth: 40
+  floatingTextPrefab: {fileID: 2857928858039914096, guid: 6a6cd7b514158ea4e88eee9d88dfc5b6, type: 3}
+  textSpawnOffset: {x: 0, y: 0.8, z: 0}
+  hitFlashDuration: 0.08
+  hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
+  dropChance: 0.35
+  lootPrefabs:
+  - {fileID: 1574605788615916794, guid: 8c97e0e24b2040b42ab4d596fc6f2107, type: 3}
+  - {fileID: 1574605788615916794, guid: a86efbfaa54778e43870c9610a38cd28, type: 3}
+  deathEffectPrefab: {fileID: 0}
+  knockbackResistance: 0
 --- !u!114 &889657675764831785
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180,29 +203,7 @@ MonoBehaviour:
   lungeTriggerDistance: 2.2
   lungeSpeedMultiplier: 2.6
   lungeWindupDuration: 0.22
-  lungeDuration: 0.20
+  lungeDuration: 0.2
   lungeCooldown: 2.5
   contactDamage: 15
   attackCooldown: 0.8
---- !u!114 &5745042731004405968
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5965952227506311519}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: acb8d172033a82c4d90e1ada0268da99, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MiniShooterGame.Enemy.EnemyHealth
-  maxHealth: 50
-  floatingTextPrefab: {fileID: 2857928858039914096, guid: 6a6cd7b514158ea4e88eee9d88dfc5b6, type: 3}
-  textSpawnOffset: {x: 0, y: 0.8, z: 0}
-  hitFlashDuration: 0.08
-  hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
-  dropChance: 0.35
-  lootPrefabs:
-  - {fileID: 1574605788615916794, guid: 8c97e0e24b2040b42ab4d596fc6f2107, type: 3}
-  - {fileID: 1574605788615916794, guid: a86efbfaa54778e43870c9610a38cd28, type: 3}
-  deathEffectPrefab: {fileID: 0}

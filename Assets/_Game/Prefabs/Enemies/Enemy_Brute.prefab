@@ -90,7 +90,7 @@ SpriteRenderer:
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.765625, y: 0.671875}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -173,15 +173,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MiniShooterGame.Enemy.EnemyHealth
   maxHealth: 140
   floatingTextPrefab: {fileID: 2857928858039914096, guid: 6a6cd7b514158ea4e88eee9d88dfc5b6, type: 3}
-  textSpawnOffset: {x: 0, y: 1.0, z: 0}
+  textSpawnOffset: {x: 0, y: 0.8, z: 0}
   hitFlashDuration: 0.08
   hitFlashColor: {r: 1, g: 1, b: 1, a: 1}
-  dropChance: 1.0
+  dropChance: 0.35
   lootPrefabs:
   - {fileID: 1574605788615916794, guid: 8c97e0e24b2040b42ab4d596fc6f2107, type: 3}
   - {fileID: 1574605788615916794, guid: a86efbfaa54778e43870c9610a38cd28, type: 3}
   deathEffectPrefab: {fileID: 0}
-  knockbackResistance: 0.70
+  knockbackResistance: 0.7
 --- !u!114 &7100000000000007
 MonoBehaviour:
   m_ObjectHideFlags: 0

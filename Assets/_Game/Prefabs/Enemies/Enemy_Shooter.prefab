@@ -30,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 5758520044982824950}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 274.13596, y: 259.50113, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -83,14 +83,14 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 4
+  m_SortingOrder: 148
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 537e665e29d04eac9bb54c5254ea8025, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.8125, y: 0.671875}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -119,7 +119,7 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 4
@@ -158,7 +158,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.515
+  m_Radius: 0.5
 --- !u!114 &8080036833914162055
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,7 +171,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: acb8d172033a82c4d90e1ada0268da99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MiniShooterGame.Enemy.EnemyHealth
-  maxHealth: 50
+  maxHealth: 45
   floatingTextPrefab: {fileID: 2857928858039914096, guid: 6a6cd7b514158ea4e88eee9d88dfc5b6, type: 3}
   textSpawnOffset: {x: 0, y: 0.8, z: 0}
   hitFlashDuration: 0.08
@@ -181,6 +181,7 @@ MonoBehaviour:
   - {fileID: 1574605788615916794, guid: 8c97e0e24b2040b42ab4d596fc6f2107, type: 3}
   - {fileID: 1574605788615916794, guid: a86efbfaa54778e43870c9610a38cd28, type: 3}
   deathEffectPrefab: {fileID: 0}
+  knockbackResistance: 0.1
 --- !u!114 &5675366592080371001
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -200,11 +201,11 @@ MonoBehaviour:
   spriteAngleOffset: -90
   separationRadius: 1.3
   separationWeight: 0.6
-  enemyProjectilePrefab: {fileID: 45703b9922b00aa409cdf91c7aa75a3e, guid: 45703b9922b00aa409cdf91c7aa75a3e, type: 3}
+  enemyProjectilePrefab: {fileID: 5488802743050156463, guid: 45703b9922b00aa409cdf91c7aa75a3e, type: 3}
   firePoint: {fileID: 0}
   fireInterval: 2.4
   projectileDamage: 12
   projectileSpeed: 11
-  spriteRenderer: {fileID: 9130471167187416665}
+  spriteRenderer: {fileID: 0}
   aimTelegraphColor: {r: 1, g: 0.4, b: 0.2, a: 1}
   telegraphDuration: 0.55
