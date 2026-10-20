@@ -45,5 +45,23 @@ namespace MiniShooterGame.Combat
 
         [Tooltip("Optional muzzle flash color tint.")]
         public Color muzzleColor = Color.yellow;
+
+        [Header("Hand Grip & Sockets")]
+        [Tooltip("Local offset for main trigger hand relative to weapon pivot.")]
+        public Vector2 mainHandOffset = new Vector2(0f, -0.04f);
+
+        [Tooltip("Whether this weapon requires a second support hand (e.g. rifles, shotguns).")]
+        public bool isTwoHanded = false;
+
+        [Tooltip("Local offset for second support hand relative to weapon pivot.")]
+        public Vector2 supportHandOffset = new Vector2(0.38f, -0.02f);
+
+        [Tooltip("Forward offset along the aim vector to prevent long stocks from clipping into character body.")]
+        public float stockForwardOffset = 0f;
+
+        [Tooltip("Local position of the muzzle tip relative to weapon pivot for projectile spawns and muzzle flashes.")]
+        public Vector2 muzzleOffset = new Vector2(0.5f, 0.05f);
     }
 }
+
+

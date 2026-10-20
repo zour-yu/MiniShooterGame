@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Weapon_AssaultRifle
   m_EditorClassIdentifier: Assembly-CSharp::MiniShooterGame.Combat.WeaponDataSO
   weaponName: Assault Rifle
-  weaponIcon: {fileID: 21300000, guid: e1000000000000000000000000000002, type: 3}
+  weaponIcon: {fileID: 21300000, guid: 077a74841e3958349948d68f721689b1, type: 3}
   fireRate: 7.5
   damage: 18
   projectileSpeed: 20
@@ -21,5 +21,11 @@ MonoBehaviour:
   spreadAngle: 6
   maxAmmo: 60
   projectilePrefab: {fileID: 0}
-  shootSound: {fileID: 0}
   muzzleColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  mainHandOffset: {x: 0, y: -0.04}
+  isTwoHanded: 1
+  supportHandOffset: {x: 0.36, y: -0.02}
+  stockForwardOffset: 0.16
+  muzzleOffset: {x: 0.90, y: 0.04}
+
+

@@ -1,3 +1,6 @@
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 using System;
 using System.Collections;
 using UnityEngine;
@@ -40,6 +43,10 @@ namespace MiniShooterGame.Player
 
         [Tooltip("Tag used to identify valid targets.")]
         [SerializeField] private string targetTag = "Enemy";
+
+        [Header("Desktop & Manual Controls")]
+        [Tooltip("If enabled, allows clicking Left Mouse or pressing Ctrl/J to manual-fire even when no enemy is targeted.")]
+        [SerializeField] private bool allowManualFire = true;
 
         [Header("Audio & Visuals (Optional)")]
         [Tooltip("Optional muzzle flash particle effect played on fire.")]
@@ -215,14 +222,27 @@ namespace MiniShooterGame.Player
             _currentTarget = nearestEnemy;
         }
 
+        private bool CheckManualFireInput()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (Mouse.current != null && Mouse.current.leftButton.isPressed) return true;
+            if (Keyboard.current != null && (Keyboard.current.ctrlKey.isPressed || Keyboard.current.jKey.isPressed)) return true;
+#else
+            if (Input.GetMouseButton(0) || Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.J)) return true;
+#endif
+            return false;
+        }
+
         /// <summary>
-        /// Manages weapon cooldown and triggers firing when an enemy is targeted.
+        /// Manages weapon cooldown and triggers firing when an enemy is targeted or manual fire is pressed.
         /// </summary>
         private void HandleShooting()
         {
             _fireCooldownTimer -= Time.deltaTime;
 
-            if (_currentTarget == null) return;
+            bool manualFire = allowManualFire && CheckManualFireInput();
+
+            if (_currentTarget == null && !manualFire) return;
 
             float currentRate = currentWeapon != null ? currentWeapon.fireRate : fireRate;
             float effectiveRate = currentRate * _buffMultiplier;
@@ -235,7 +255,7 @@ namespace MiniShooterGame.Player
         }
 
         /// <summary>
-        /// Instantiates and directs projectile(s) towards the current target,
+        /// Instantiates and directs projectile(s) towards the target or aiming direction,
         /// handling multi-pellet spread, custom damage, and ammo countdown.
         /// </summary>
         private void FireProjectile()
@@ -247,7 +267,22 @@ namespace MiniShooterGame.Player
             if (prefabToUse == null) return;
 
             Vector3 spawnPosition = firePoint != null ? firePoint.position : transform.position;
-            Vector2 aimDirection = ((Vector2)_currentTarget.position - (Vector2)spawnPosition).normalized;
+            Vector2 aimDirection = Vector2.right;
+
+            if (_currentTarget != null)
+            {
+                aimDirection = ((Vector2)_currentTarget.position - (Vector2)spawnPosition).normalized;
+            }
+            else if (firePoint != null)
+            {
+                // Aim directly out of the gun barrel
+                aimDirection = firePoint.right;
+                if (aimDirection.sqrMagnitude < 0.001f) aimDirection = transform.right;
+            }
+            else
+            {
+                aimDirection = transform.right;
+            }
 
             int pellets = currentWeapon != null ? Mathf.Max(1, currentWeapon.pelletsPerShot) : 1;
             float spreadAngle = currentWeapon != null ? currentWeapon.spreadAngle : 0f;

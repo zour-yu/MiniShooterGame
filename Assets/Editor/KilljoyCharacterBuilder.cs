@@ -265,8 +265,20 @@ namespace MiniShooterGame.Editor
             }
             gunMount.localPosition = new Vector3(0.35f, 0.8f, 0f);
 
-            SpriteRenderer gunSr = gunMount.GetComponent<SpriteRenderer>();
-            if (gunSr == null) gunSr = gunMount.gameObject.AddComponent<SpriteRenderer>();
+            // Remove legacy SpriteRenderer directly on gunMount pivot if present
+            var oldMountSr = gunMount.GetComponent<SpriteRenderer>();
+            if (oldMountSr != null) Object.DestroyImmediate(oldMountSr);
+
+            // Setup dedicated Weapon_Visual child for gun sprite
+            Transform gunVisual = gunMount.Find("Weapon_Visual");
+            if (gunVisual == null)
+            {
+                GameObject gvObj = new GameObject("Weapon_Visual");
+                gvObj.transform.SetParent(gunMount, false);
+                gunVisual = gvObj.transform;
+            }
+            SpriteRenderer gunSr = gunVisual.GetComponent<SpriteRenderer>();
+            if (gunSr == null) gunSr = gunVisual.gameObject.AddComponent<SpriteRenderer>();
 
             Sprite placeholderGun = AssetDatabase.LoadAssetAtPath<Sprite>($"{OutputFolder}/Gun_Pistol_Placeholder.png");
             if (placeholderGun != null)
@@ -275,6 +287,35 @@ namespace MiniShooterGame.Editor
             }
             gunSr.sortingOrder = 151; // in front of body by default
             gunSr.color = Color.white;
+
+            // Setup Main Hand child on gun mount
+            Transform mainHand = gunMount.Find("Main_Hand");
+            if (mainHand == null)
+            {
+                GameObject mhObj = new GameObject("Main_Hand");
+                mhObj.transform.SetParent(gunMount, false);
+                mainHand = mhObj.transform;
+            }
+            SpriteRenderer mhSr = mainHand.GetComponent<SpriteRenderer>();
+            if (mhSr == null) mhSr = mainHand.gameObject.AddComponent<SpriteRenderer>();
+            Sprite mainHandSprite = AssetDatabase.LoadAssetAtPath<Sprite>($"{OutputFolder}/Killjoy_Hand_Main_WithCuff.png");
+            if (mainHandSprite == null) mainHandSprite = AssetDatabase.LoadAssetAtPath<Sprite>($"{OutputFolder}/Killjoy_Hand_Main.png");
+            if (mainHandSprite != null) mhSr.sprite = mainHandSprite;
+            mhSr.sortingOrder = 152;
+
+            // Setup Support Hand child on gun mount (for two-handed weapons)
+            Transform supportHand = gunMount.Find("Support_Hand");
+            if (supportHand == null)
+            {
+                GameObject shObj = new GameObject("Support_Hand");
+                shObj.transform.SetParent(gunMount, false);
+                supportHand = shObj.transform;
+            }
+            SpriteRenderer shSr = supportHand.GetComponent<SpriteRenderer>();
+            if (shSr == null) shSr = supportHand.gameObject.AddComponent<SpriteRenderer>();
+            Sprite supportHandSprite = AssetDatabase.LoadAssetAtPath<Sprite>($"{OutputFolder}/Killjoy_Hand_Support.png");
+            if (supportHandSprite != null) shSr.sprite = supportHandSprite;
+            shSr.sortingOrder = 150;
 
             // Setup FirePoint at gun muzzle
             Transform firePoint = gunMount.Find("FirePoint");
@@ -311,7 +352,14 @@ namespace MiniShooterGame.Editor
             soVisual.FindProperty("gunMount").objectReferenceValue = gunMount;
             soVisual.FindProperty("gunRenderer").objectReferenceValue = gunSr;
             soVisual.FindProperty("defaultPlaceholderGun").objectReferenceValue = placeholderGun;
+            soVisual.FindProperty("mainHandMount").objectReferenceValue = mainHand;
+            soVisual.FindProperty("mainHandRenderer").objectReferenceValue = mhSr;
+            soVisual.FindProperty("mainHandSprite").objectReferenceValue = mainHandSprite;
+            soVisual.FindProperty("supportHandMount").objectReferenceValue = supportHand;
+            soVisual.FindProperty("supportHandRenderer").objectReferenceValue = shSr;
+            soVisual.FindProperty("supportHandSprite").objectReferenceValue = supportHandSprite;
             soVisual.ApplyModifiedProperties();
+
 
             // Also update PlayerMovement: spriteAngleOffset = 0 since Killjoy faces DOWN / SIDE normally, not Kenny top-down angle
             PlayerMovement movement = player.GetComponent<PlayerMovement>();
@@ -327,6 +375,14 @@ namespace MiniShooterGame.Editor
 
             EditorUtility.SetDirty(player);
             UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(player.scene);
+
+            string prefabPath = "Assets/_Game/Prefabs/Characters/Player.prefab";
+            if (File.Exists(prefabPath))
+            {
+                PrefabUtility.SaveAsPrefabAssetAndConnect(player, prefabPath, InteractionMode.AutomatedAction);
+                Debug.Log("[KilljoyBuilder] Synchronized scene Player changes to Player.prefab!");
+            }
+
             Debug.Log("[KilljoyBuilder] Applied Killjoy character, animations, and modular equippable gun mount to Player!");
         }
     }

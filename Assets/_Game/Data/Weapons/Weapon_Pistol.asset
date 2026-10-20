@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Weapon_Pistol
   m_EditorClassIdentifier: Assembly-CSharp::MiniShooterGame.Combat.WeaponDataSO
   weaponName: Pistol
-  weaponIcon: {fileID: 21300000, guid: e1000000000000000000000000000001, type: 3}
+  weaponIcon: {fileID: 21300000, guid: 872dff65e7edc05479c27af09ded35dc, type: 3}
   fireRate: 3.5
   damage: 15
   projectileSpeed: 16
@@ -21,5 +21,11 @@ MonoBehaviour:
   spreadAngle: 0
   maxAmmo: -1
   projectilePrefab: {fileID: 0}
-  shootSound: {fileID: 0}
   muzzleColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  mainHandOffset: {x: 0, y: -0.04}
+  isTwoHanded: 0
+  supportHandOffset: {x: 0.38, y: -0.02}
+  stockForwardOffset: 0
+  muzzleOffset: {x: 0.42, y: 0.06}
+
+

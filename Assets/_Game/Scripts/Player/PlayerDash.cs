@@ -2,6 +2,7 @@
 using UnityEngine.InputSystem;
 #endif
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -154,11 +155,32 @@ namespace MiniShooterGame.Player
                 _playerMovement.IsMovementLocked = true;
             }
 
-            // Determine dash direction: use current input vector or transform facing direction
+            // Determine dash direction: use current input vector or character facing direction
             Vector2 dashDirection = Vector2.zero;
             if (_playerMovement != null && _playerMovement.CurrentInput.sqrMagnitude > 0.001f)
             {
                 dashDirection = _playerMovement.CurrentInput.normalized;
+            }
+            else if (TryGetComponent<CharacterVisualController>(out var visual))
+            {
+                // Dash in the direction the character is currently facing
+                switch (visual.CurrentFacing)
+                {
+                    case CharacterFacing.Side:
+                        dashDirection = visual.IsFacingLeft ? Vector2.left : Vector2.right;
+                        break;
+                    case CharacterFacing.Up:
+                        dashDirection = Vector2.up;
+                        break;
+                    case CharacterFacing.Down:
+                    default:
+                        dashDirection = Vector2.down;
+                        break;
+                }
+            }
+            else if (TryGetComponent<PlayerShooter>(out var shooter) && shooter.CurrentTarget != null)
+            {
+                dashDirection = ((Vector2)shooter.CurrentTarget.position - (Vector2)transform.position).normalized;
             }
             else
             {
@@ -170,12 +192,18 @@ namespace MiniShooterGame.Player
             float baseSpeed = _playerMovement != null ? _playerMovement.MoveSpeed : 6f;
             Vector2 dashVelocity = dashDirection * (baseSpeed * dashSpeedMultiplier);
 
-            // Apply invulnerability visual (translucent sprite)
-            if (_spriteRenderer != null)
+            // Apply invulnerability visual (translucent sprite on player and gun mount)
+            var allRenderers = GetComponentsInChildren<SpriteRenderer>();
+            var originalColors = new Dictionary<SpriteRenderer, Color>();
+            foreach (var r in allRenderers)
             {
-                Color c = _originalSpriteColor;
-                c.a = invulnerableAlpha;
-                _spriteRenderer.color = c;
+                if (r != null)
+                {
+                    originalColors[r] = r.color;
+                    Color c = r.color;
+                    c.a = invulnerableAlpha;
+                    r.color = c;
+                }
             }
 
             float elapsed = 0f;
@@ -200,9 +228,13 @@ namespace MiniShooterGame.Player
                 _playerMovement.IsMovementLocked = false;
             }
 
-            if (_spriteRenderer != null)
+            // Restore original sprite alphas
+            foreach (var kvp in originalColors)
             {
-                _spriteRenderer.color = _originalSpriteColor;
+                if (kvp.Key != null)
+                {
+                    kvp.Key.color = kvp.Value;
+                }
             }
 
             OnDashEnded?.Invoke();

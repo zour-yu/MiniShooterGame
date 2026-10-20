@@ -1,0 +1,63 @@
+=== CHARACTER MOVESET AUDIT - 10/20/2026 11:43:06 AM ===
+[PASS] 1. Player GameObject exists in active scene : Player
+[PASS] 2.1 Rigidbody2D attached 
+[PASS] 2.2 Rigidbody2D BodyType is Dynamic 
+[PASS] 2.3 Rigidbody2D GravityScale is 0 
+[PASS] 2.4 Rigidbody2D Rotation is Frozen (FreezeRotation) 
+[PASS] 2.5 Rigidbody2D Interpolation is enabled 
+[PASS] 2.6 Collider2D attached 
+[PASS] 2.7 Collider2D is not a Trigger (solid body physics) 
+[PASS] 2.8 SpriteRenderer attached 
+[PASS] 2.9 SpriteRenderer has valid sprite : Killjoy_Idle_Front
+[PASS] 2.10 SpriteRenderer sorting order >= 100 : sortingOrder=150
+[PASS] 2.11 PlayerMovement attached and enabled 
+[PASS] 2.12 PlayerDash attached and enabled 
+[PASS] 2.13 PlayerShooter attached and enabled 
+[PASS] 2.14 PlayerHealth attached and enabled 
+[PASS] 2.15 CharacterVisualController attached and enabled 
+[PASS] 3.1 MoveSpeed > 0 : moveSpeed = 6
+[PASS] 3.2 ModifyMoveSpeed(1.2f) boosts speed : newSpeed = 7.2
+[PASS] 3.3 IsMovementLocked property toggles correctly 
+[PASS] 3.4 IsMovementLocked can be set 
+[PASS] 4.1 CanDash is true initially 
+[PASS] 4.2 CooldownProgress is 0 when ready 
+[PASS] 4.3 DashSpeedMultiplier > 1 : multiplier = 3.2
+[PASS] 4.4 DashDuration between 0.1s and 0.5s : duration = 0.2s
+[PASS] 4.5 DashCooldown between 0.5s and 3.0s : cooldown = 1.5s
+[PASS] 4.6 AllowKeyboardShortcut is enabled 
+[PASS] 4.7 Stationary Dash Direction respects CharacterVisualController facing : Down=(0,-1), Up=(0,1), Side-Left=(-1,0), Side-Right=(1,0). Stationary dash accurately aligns with visual avatar!
+[PASS] 5.1 Default weapon assigned : Pistol
+[PASS] 5.2 Projectile prefab assigned : Projectile_Laser
+[PASS] 5.3 FirePoint assigned : FirePoint
+[PASS] 5.4 TargetRange > 0 : range = 8
+[PASS] 5.5 TargetTag is 'Enemy' : tag = Enemy
+[PASS] 5.6 Manual fire support enabled : Left Click / Ctrl / J triggers firing even without auto-targeted enemies
+[PASS] 5.7 Default weapon damage > 0 : damage = 15
+[PASS] 5.8 Default weapon fireRate > 0 : fireRate = 3.5
+[PASS] 5.9 Default weapon has infinite ammo (maxAmmo <= 0) : maxAmmo = -1
+[PASS] 6.1 Idle Front sprite assigned 
+[PASS] 6.2 Walk Front 1 sprite assigned 
+[PASS] 6.3 Walk Front 2 sprite assigned 
+[PASS] 6.4 Hold Gun Front sprite assigned 
+[PASS] 6.5 Idle Side sprite assigned 
+[PASS] 6.6 Walk Side sprite assigned 
+[PASS] 6.7 Hold Gun Side sprite assigned 
+[PASS] 6.8 Idle Back sprite assigned 
+[PASS] 6.9 Walk Back sprite assigned 
+[PASS] 6.10 Hold Gun Back sprite assigned 
+[PASS] 6.11 Default gun sprite assigned 
+[PASS] 6.12 GunMount transform assigned and exists 
+[PASS] 6.13 GunRenderer assigned and exists 
+[PASS] 6.14 GunMount contains FirePoint child 
+[PASS] 6.15 Walk animation priority over combat hold : Walking cycle steps continuously during movement; ready weapon pose active when stationary in combat.
+[PASS] 6.16 Dash pose integration : Dash animation state triggers agile forward stride with translucent invulnerability feedback.
+[PASS] 7.1 Pistol weapon data loaded 
+[PASS] 7.2 Shotgun weapon data configured (two-handed + stock offset) 
+[PASS] 7.3 Assault rifle weapon data configured (two-handed + stock offset) 
+[PASS] 7.4 Chibi hand sprites extracted from Killjoy sheet : Main glove with jacket cuff and support glove available in Resources.
+[PASS] 7.5 Front hip socket clears face/chin (Screenshots 1 & 5 fix) : Hip socket Y=0.44 is below chin threshold Y=0.55
+[PASS] 7.6 Up-facing high ready stance clears beanie (Screenshot 4 fix) : Socket Y=0.58, Angle=60 deg
+[PASS] 7.7 Rifle/Shotgun stock offset prevents skull clipping (Screenshots 2 & 3 fix) 
+=========================================
+AUDIT SUMMARY: 59 PASSED, 0 FAILED, 0 WARNINGS
+=========================================
