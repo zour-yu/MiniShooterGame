@@ -1,4 +1,4 @@
-=== CHARACTER MOVESET AUDIT - 10/20/2026 1:53:36 PM ===
+=== CHARACTER MOVESET AUDIT - 10/20/2026 2:06:15 PM ===
 [PASS] 1. Player GameObject exists in active scene : Player
 [PASS] 2.1 Rigidbody2D attached 
 [PASS] 2.2 Rigidbody2D BodyType is Dynamic 
@@ -58,6 +58,12 @@
 [PASS] 7.5 Front hip socket clears face/chin (Screenshots 1 & 5 fix) : Hip socket Y=0.44 is below chin threshold Y=0.55
 [PASS] 7.6 Up-facing high ready stance clears beanie (Screenshot 4 fix) : Socket Y=0.58, Angle=60 deg
 [PASS] 7.7 Rifle/Shotgun stock offset prevents skull clipping (Screenshots 2 & 3 fix) 
+[PASS] 8.1 Enemy_Chaser prefab exists with ChaserEnemy 
+[PASS] 8.2 Enemy_Shooter prefab exists with RangedShooterEnemy 
+[PASS] 8.3 Enemy_Brute mini-boss prefab exists (140 HP, 70% armor) 
+[PASS] 8.4 Enemy_Exploder kamikaze prefab exists (AoE chain reactions) 
+[PASS] 8.5 WaveSpawner exists in scene 
+[PASS] 8.6 WaveSpawner has 5 tactical waves configured : Total waves: 5
 =========================================
-AUDIT SUMMARY: 59 PASSED, 0 FAILED, 0 WARNINGS
+AUDIT SUMMARY: 65 PASSED, 0 FAILED, 0 WARNINGS
 =========================================

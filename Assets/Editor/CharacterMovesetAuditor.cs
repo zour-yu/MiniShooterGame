@@ -9,6 +9,8 @@ using UnityEngine;
 using MiniShooterGame.Combat;
 using MiniShooterGame.Player;
 using MiniShooterGame.UI;
+using MiniShooterGame.Enemy;
+using MiniShooterGame.Core;
 
 namespace MiniShooterGame.Editor
 {
@@ -255,6 +257,24 @@ namespace MiniShooterGame.Editor
                 Check("7.6 Up-facing high ready stance clears beanie (Screenshot 4 fix)", backSocketY >= 0.55f && highReadyRestAngle >= 45f, $"Socket Y={backSocketY:F2}, Angle={highReadyRestAngle} deg");
 
                 Check("7.7 Rifle/Shotgun stock offset prevents skull clipping (Screenshots 2 & 3 fix)", shotgunAsset != null && shotgunAsset.stockForwardOffset > 0.1f && rifleAsset != null && rifleAsset.stockForwardOffset > 0.1f);
+
+                // 8. Enemy Archetypes & Wave Spawner Audit
+                var chaserPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Game/Prefabs/Enemies/Enemy_Chaser.prefab");
+                var shooterPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Game/Prefabs/Enemies/Enemy_Shooter.prefab");
+                var brutePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Game/Prefabs/Enemies/Enemy_Brute.prefab");
+                var exploderPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Game/Prefabs/Enemies/Enemy_Exploder.prefab");
+
+                Check("8.1 Enemy_Chaser prefab exists with ChaserEnemy", chaserPrefab != null && chaserPrefab.GetComponent<ChaserEnemy>() != null);
+                Check("8.2 Enemy_Shooter prefab exists with RangedShooterEnemy", shooterPrefab != null && shooterPrefab.GetComponent<RangedShooterEnemy>() != null);
+                Check("8.3 Enemy_Brute mini-boss prefab exists (140 HP, 70% armor)", brutePrefab != null && brutePrefab.GetComponent<BruteEnemy>() != null && brutePrefab.GetComponent<EnemyHealth>()?.MaxHealth >= 100);
+                Check("8.4 Enemy_Exploder kamikaze prefab exists (AoE chain reactions)", exploderPrefab != null && exploderPrefab.GetComponent<ExploderEnemy>() != null);
+
+                var spawner = UnityEngine.Object.FindFirstObjectByType<WaveSpawner>();
+                Check("8.5 WaveSpawner exists in scene", spawner != null);
+                if (spawner != null)
+                {
+                    Check("8.6 WaveSpawner has 5 tactical waves configured", spawner.TotalWaves >= 5, $"Total waves: {spawner.TotalWaves}");
+                }
             }
 
             // Summary
